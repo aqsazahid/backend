@@ -77,6 +77,42 @@ app.post('/api/notes', (request, response) => {
   })
 })
 
+app.post('/api/persons', async(req, res) => {
+  const body = req.body;
+  // Check if name or number is missing
+  if (!body.name || !body.number) {
+    return res.status(400).json({
+      error: 'name or number is missing'
+    });
+  }
+
+  const person = new Phonebook({
+    name: body.name,
+    number: body.number
+  })
+
+  person.save().then(newPerson => {
+    res.json(newPerson)
+  })
+
+ // Check if name already exists in the persons
+  //const nameExists = persons.some(person => person.name === body.name);
+  // if (nameExists) {
+  //   return res.status(400).json({
+  //     error: 'name must be unique'
+  //   });
+  // }
+
+  // const newPerson = {
+  //   id: generateId(),
+  //   name: body.name,
+  //   number: body.number
+  // };
+
+  // persons = persons.concat(newPerson);
+  // res.json(newPerson);
+});
+
 app.get('/api/persons', (request, response) => {
   // response.json(persons)
   Phonebook.find({}).then(person => {
@@ -126,32 +162,6 @@ app.delete('/api/persons/:id', (req, res) => {
 const generateId = () => {
     return Math.floor(Math.random() * 1000000);
 };
-
-app.post('/api/persons', (req, res) => {
-    const body = req.body;
-    // Check if name or number is missing
-    if (!body.name || !body.number) {
-      return res.status(400).json({
-        error: 'name or number is missing'
-      });
-    }
-    // Check if name already exists in the persons
-    const nameExists = persons.some(person => person.name === body.name);
-    if (nameExists) {
-      return res.status(400).json({
-        error: 'name must be unique'
-      });
-    }
-  
-    const newPerson = {
-      id: generateId(),
-      name: body.name,
-      number: body.number
-    };
-  
-    persons = persons.concat(newPerson);
-    res.json(newPerson);
-});
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
