@@ -1,13 +1,15 @@
+require('dotenv').config()
 const express = require('express')
 const app = express();
 const morgan = require('morgan');
 app.use(express.json()); 
 const cors = require('cors')
 app.use(cors())
-// app.use(morgan('tiny'));
-morgan.token('body', (req) => JSON.stringify(req.body));
+const Note = require('./models/note');
+const Phonebook = require('./models/phonebook')
 
 // Use Morgan with the custom token
+morgan.token('body', (req) => JSON.stringify(req.body));
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 app.use(express.static('dist'))
 
@@ -32,7 +34,7 @@ let persons = [
       name: "Mary Poppendieck",
       number: "39-23-6423122"
     }
-  ]
+]
 let notes = [
     {
       id: "1",
@@ -49,11 +51,37 @@ let notes = [
       content: "GET and POST are the most important methods of HTTP protocol",
       important: true
     }
-  ]
-  
+]
+//get data from database 
+app.get('/api/notes', (request, response) => {
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
+})
+
+//post
+app.post('/api/notes', (request, response) => {
+  const body = request.body
+
+  if (body.content === undefined) {
+    return response.status(400).json({ error: 'content missing' })
+  }
+
+  const note = new Note({
+    content: body.content,
+    important: body.important || false,
+  })
+
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
+})
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  // response.json(persons)
+  Phonebook.find({}).then(person => {
+    response.json(person)
+  })
 })
 
 // New /info route
@@ -125,7 +153,7 @@ app.post('/api/persons', (req, res) => {
     res.json(newPerson);
 });
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
