@@ -9,8 +9,9 @@ morgan.token('body', (req) => JSON.stringify(req.body));
 
 // Use Morgan with the custom token
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
+app.use(express.static('dist'))
 
-let phonebook = [
+let persons = [
     {
       id: 1,
       name: "Arto Hellas",
@@ -52,6 +53,7 @@ let notes = [
   
 
 app.get('/api/persons', (request, response) => {
+  debugger
   response.json(persons)
 })
 
@@ -61,7 +63,7 @@ app.get('/info', (request, response) => {
     const requestTime = new Date().toString()
   
     response.send(`
-      <p>Phonebook has info for ${entryCount} people</p>
+      <p>persons has info for ${entryCount} people</p>
       <p>${requestTime}</p>
     `)
 })
@@ -69,7 +71,7 @@ app.get('/info', (request, response) => {
 // New /person route
  app.get('/api/persons/:id', (request,response) => {
     const id =  Number(request.params.id)
-    const person = phonebook.find(person => person.id === id)
+    const person = persons.find(person => person.id === id)
     if (person) {
         response.json(person)
       } else {
@@ -85,8 +87,8 @@ const idExists = (array, id) => {
 //delet person
 app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
-    if (idExists(phonebook, id)) {
-      phonebook = phonebook.filter(person => person.id !== id)
+    if (idExists(persons, id)) {
+      persons = persons.filter(person => person.id !== id)
       res.status(204).end()
     } else {
       res.status(404).send({ error: 'Person not found' })
@@ -106,8 +108,8 @@ app.post('/api/persons', (req, res) => {
         error: 'name or number is missing'
       });
     }
-    // Check if name already exists in the phonebook
-    const nameExists = phonebook.some(person => person.name === body.name);
+    // Check if name already exists in the persons
+    const nameExists = persons.some(person => person.name === body.name);
     if (nameExists) {
       return res.status(400).json({
         error: 'name must be unique'
@@ -120,7 +122,7 @@ app.post('/api/persons', (req, res) => {
       number: body.number
     };
   
-    phonebook = phonebook.concat(newPerson);
+    persons = persons.concat(newPerson);
     res.json(newPerson);
 });
 
