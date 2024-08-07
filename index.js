@@ -53,12 +53,11 @@ let notes = [
   
 
 app.get('/api/persons', (request, response) => {
-  debugger
   response.json(persons)
 })
 
 // New /info route
-app.get('/info', (request, response) => {
+app.get('/api/info', (request, response) => {
     const entryCount = notes.length
     const requestTime = new Date().toString()
   
