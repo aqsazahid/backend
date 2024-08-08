@@ -10,7 +10,26 @@ mongoose.connect(url).then(result => {
   .catch(error => {
     console.log('error connecting to MongoDB:', error.message)
   });
-
+  const phoneNumberValidator = (phoneNumber) => {
+    if (phoneNumber.length < 8) {
+      return false;
+    }
+    
+    // Split the phone number into two parts
+    const parts = phoneNumber.split('-');
+    
+    // Validate the format: two parts separated by '-'
+    if (parts.length !== 2) {
+      return false;
+    }
+  
+    // Validate each part: should be numbers and of correct length
+    const [firstPart, secondPart] = parts;
+    return (
+      /^\d{2,3}$/.test(firstPart) && // First part: 2 or 3 digits
+      /^\d+$/.test(secondPart) // Second part: only digits
+    );
+  };
 const phonebookSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -19,6 +38,10 @@ const phonebookSchema = new mongoose.Schema({
   },
   number: {
     type: String,
+    validate: {
+      validator: phoneNumberValidator,
+      message: 'Invalid phone number format',
+    },
     required: [true, 'Number is required']
   }
 });
