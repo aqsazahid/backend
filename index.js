@@ -82,17 +82,16 @@ app.post('/api/persons', async(request, response,next) => {
   const body = request.body;
   // Check if name or number is missing
   if (!body.name || !body.number) {
-    return res.status(400).json({
+    return response.status(400).json({
       error: 'name or number is missing'
     });
   }
   try {
+    debugger
     const existingPerson = await Phonebook.findOne({ name: body.name });
-    console.log(existingPerson)
     if (existingPerson) {
       return response.status(400).json({ error: 'name must be unique' });
     }
-
     const person = new Phonebook({
       name: body.name,
       number: body.number
@@ -171,15 +170,24 @@ app.delete('/api/persons/:id', (request,response,next) => {
 //add a person
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
+  debugger
+  // if (error.name === 'CastError') {
+  //   return response.status(400).send({ error: 'malformatted id' })
+  // } else if (error.name === 'ValidationError') {
+  //   return response.status(400).json({ error: error.message })
+  // }
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
+  // next(error)
+  console.error(error.message);
+  if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message });
+  } else if (error.name === 'CastError') {
+    return response.status(400).json({ error: 'malformatted id' });
   }
 
-  next(error)
+  next(error);
+
+  next(error);
 }
 
 app.use(errorHandler)
