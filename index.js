@@ -143,19 +143,24 @@ app.get('/api/info', (request, response) => {
  })
 
  
-const idExists = (array, id) => {
-    return array.some(item => item.id === id);
-}
+// const idExists = (array, id) => {
+//     return array.some(item => item.id === id);
+// }
 
 //delet person
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    if (idExists(persons, id)) {
-      persons = persons.filter(person => person.id !== id)
+    // const id = Number(req.params.id)
+    // if (idExists(persons, id)) {
+    //   persons = persons.filter(person => person.id !== id)
+    //   res.status(204).end()
+    // } else {
+    //   res.status(404).send({ error: 'Person not found' })
+    // }
+    Phonebook.findByIdAndDelete(req.params.id)
+    .then(result => {
       res.status(204).end()
-    } else {
-      res.status(404).send({ error: 'Person not found' })
-    }
+    })
+    .catch(error => next(error))
 })
 
 //add a person
@@ -167,3 +172,15 @@ const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
