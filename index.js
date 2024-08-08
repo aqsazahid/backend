@@ -54,7 +54,7 @@ let notes = [
 ]
 
 app.get('/', (request, response) => {
-  res.redirect('/api/persons');
+  respose.redirect('/api/persons');
 });
 //get data from database 
 app.get('/api/notes', (request, response,next) => {
