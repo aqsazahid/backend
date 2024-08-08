@@ -52,6 +52,10 @@ let notes = [
       important: true
     }
 ]
+
+app.get('/', (request, response) => {
+  res.redirect('/api/persons');
+});
 //get data from database 
 app.get('/api/notes', (request, response,next) => {
   Note.find({}).then(notes => {
