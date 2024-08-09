@@ -133,3 +133,37 @@ describe('mostBlogs', () => {
     assert.strictEqual(result.blogs, 2)
   })
 })
+
+describe('mostLikes', () => {
+  const blogs = [
+    { author: 'Edsger W. Dijkstra', likes: 5 },
+    { author: 'Edsger W. Dijkstra', likes: 12 },
+    { author: 'Robert C. Martin', likes: 10 },
+    { author: 'Robert C. Martin', likes: 7 }
+  ]
+
+  test('returns the author with the most likes and the total number of likes', () => {
+    const result = listHelper.mostLikes(blogs)
+    assert.deepStrictEqual(result, {
+      author: 'Edsger W. Dijkstra',
+      likes: 17
+    })
+  })
+
+  test('returns null for an empty list', () => {
+    const result = listHelper.mostLikes([])
+    assert.strictEqual(result, null)
+  })
+
+  test('returns the correct author when there is a tie', () => {
+    const blogsWithTie = [
+      { author: 'Author A', likes: 10 },
+      { author: 'Author B', likes: 10 },
+      { author: 'Author A', likes: 5 },
+      { author: 'Author B', likes: 5 }
+    ]
+    const result = listHelper.mostLikes(blogsWithTie)
+    assert.ok(result.author === 'Author A' || result.author === 'Author B')
+    assert.strictEqual(result.likes, 15)
+  })
+})
