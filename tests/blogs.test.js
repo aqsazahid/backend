@@ -59,3 +59,77 @@ describe('total likes', () => {
     assert.strictEqual(result, 0)
   })
 })
+
+describe('most favourite blog', () => {
+  const listWithMultipleBlogs = [
+    {
+      _id: '5a422aa71b54a676234d17f9',
+      title: 'React patterns',
+      author: 'Michael Chan',
+      url: 'https://reactpatterns.com/',
+      likes: 7,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d17fa',
+      title: 'Canonical string reduction',
+      author: 'Edsger W. Dijkstra',
+      url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+      likes: 12,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d17fb',
+      title: 'First class tests',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.html',
+      likes: 10,
+      __v: 0
+    }
+  ]
+  test('returns the blog with the most likes', () => {
+    const result = listHelper.favoriteBlog(listWithMultipleBlogs)
+    assert.deepStrictEqual(result, {
+      title: 'Canonical string reduction',
+      author: 'Edsger W. Dijkstra',
+      likes: 12
+    })
+  })
+
+  test('returns null for an empty list', () => {
+    const result = listHelper.favoriteBlog([])
+    assert.strictEqual(result, null)
+  })
+})
+
+describe('mostBlogs', () => {
+  const blogs = [
+    { author: 'Edsger W. Dijkstra' },
+    { author: 'Edsger W. Dijkstra' },
+    { author: 'Robert C. Martin' },
+    { author: 'Robert C. Martin' },
+    { author: 'Robert C. Martin' }
+  ]
+  test('returns the author with the most blogs and the number of blogs', () => {
+    const result = listHelper.mostBlogs(blogs)
+    assert.deepStrictEqual(result, {
+      author: 'Robert C. Martin',
+      blogs: 3
+    })
+  })
+  test('returns null for an empty list', () => {
+    const result = listHelper.mostBlogs([])
+    assert.strictEqual(result, null)
+  })
+  test('returns the correct author when there is a tie', () => {
+    const blogsWithTie = [
+      { author: 'Author A' },
+      { author: 'Author B' },
+      { author: 'Author A' },
+      { author: 'Author B' }
+    ]
+    const result = listHelper.mostBlogs(blogsWithTie)
+    assert.ok(result.author === 'Author A' || result.author === 'Author B')
+    assert.strictEqual(result.blogs, 2)
+  })
+})
