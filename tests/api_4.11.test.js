@@ -1,14 +1,15 @@
 const supertest = require('supertest')
+const config = require('../utils/config')
 const assert = require('assert')
 const mongoose = require('mongoose')
 const { test, describe,before,beforeEach,after } = require('node:test')
 const app = require('../app') // Path to your Express app
-const Blog = require('../models/blog') // Path to your Blog model
+const Blog = require('../models/blogs') // Path to your Blog model
 
 const api = supertest(app)
 
 before(async () => {
-  await mongoose.connect('your_test_database_url', { useNewUrlParser: true, useUnifiedTopology: true })
+  await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 })
 
 beforeEach(async () => {

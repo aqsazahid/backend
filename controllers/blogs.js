@@ -18,15 +18,31 @@ const Blog = require('../models/blogs')
 //     }).catch(error => next(error))
 // })
 
-blogsRouter.post('/', async (req, res) => {
+// blogsRouter.post('/', async (req, res) => {
+//   try {
+//     const blog = new Blog(req.body)
+//     const savedBlog = await blog.save()
+//     res.status(201).json(savedBlog)
+//   } catch (error) {
+//     res.status(400).json({ error: 'unable to save the blog post' })
+//   }
+// })
+
+blogsRouter.post('/api/blogs', async (req, res) => {
+  const { title, author, url, likes = 0 } = req.body
+
+  if (!title || !url) {
+    return res.status(400).json({ error: 'title and url are required' })
+  }
+
   try {
-    const blog = new Blog(req.body)
+    const blog = new Blog({ title, author, url, likes })
     const savedBlog = await blog.save()
     res.status(201).json(savedBlog)
   } catch (error) {
     res.status(400).json({ error: 'unable to save the blog post' })
   }
-})
+});
 
 blogsRouter.get('/', async (req, res) => {
   try {
