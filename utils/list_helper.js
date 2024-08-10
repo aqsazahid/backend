@@ -13,6 +13,7 @@ const favoriteBlog = (blogs) => {
 
   // Find the maximum number of likes
   const maxLikes = Math.max(...blogs.map(blog => blog.likes))
+  console.log("max likes" + maxLikes)
 
   // Find the blog(s) with the maximum number of likes
   const favBlog = blogs.find(blog => blog.likes === maxLikes)
