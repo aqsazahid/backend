@@ -1,4 +1,5 @@
 const blogsRouter = require('express').Router()
+require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const Blog = require('../models/blogs')
 const  User = require('../models/user')
@@ -41,16 +42,24 @@ blogsRouter.get('/', async (req, res) => {
   }
 })
 
-blogsRouter.delete('/api/blogs/:id', async (req, res) => {
+blogsRouter.delete('/:id', async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndRemove(req.params.id)
-    if (blog) {
-      res.status(204).end()
-    } else {
-      res.status(404).json({ error: 'Blog post not found' })
+    const decodedToken = jwt.verify(req.token, process.env.SECRET, { algorithms: ['HS256'] })
+    if (!decodedToken.id) {
+      return res.status(401).json({ error: 'token missing or invalid' })
     }
+
+    const blog = await Blog.findById(req.params.id)
+    if (!blog) {
+      return res.status(404).json({ error: 'blog not found' })
+    }
+    if (blog.user.toString() !== decodedToken.id.toString()) {
+      return res.status(403).json({ error: 'only the creator can delete this blog' })
+    }
+    await blog.remove()
+    res.status(204).end()
   } catch (error) {
-    res.status(400).json({ error: 'Invalid blog post id' })
+    res.status(401).json({ error: 'token missing or invalid' })
   }
 })
 
