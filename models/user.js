@@ -19,6 +19,12 @@ const userSchema = new mongoose.Schema({
       ref: 'Note'
     }
   ],
+  blogs: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Blog', // Reference to the Blog model
+    }
+  ],
 })
 
 userSchema.set('toJSON', {
