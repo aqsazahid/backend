@@ -5,15 +5,27 @@ const mongoose = require('mongoose')
 const { test, describe,before,beforeEach,after } = require('node:test')
 const app = require('../app') // Path to your Express app
 const Blog = require('../models/blogs') // Path to your Blog model
-
+const  User = require('../models/user')
+const jwt = require('jsonwebtoken')
 const api = supertest(app)
 
 before(async () => {
   await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 })
+let token = ''
 
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
+
+  const user = new User({
+    username: 'testuser',
+    name: 'Test User',
+    passwordHash: 'passwordhash'
+  })
+  await user.save()
+
+  token = jwt.sign({ id: user._id }, process.env.SECRET, { algorithm: 'HS256' })
 })
 
 describe('POST /api/blogs', () => {
@@ -26,6 +38,7 @@ describe('POST /api/blogs', () => {
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)

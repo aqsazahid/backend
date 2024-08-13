@@ -1,11 +1,13 @@
+// utils/middleware.js
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
-const tokenExtractor = (request, response, next) => {
-  const authorization = request.get('authorization')
+
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization')
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    request.token = authorization.substring(7)
+    req.token = authorization.substring(7)
   } else {
-    request.token = null
+    req.token = null
   }
   next()
 }
@@ -32,6 +34,7 @@ const userExtractor = async (req, res, next) => {
   }
   next()
 }
+
 module.exports = {
   tokenExtractor,
   userExtractor,

@@ -5,20 +5,31 @@ const mongoose = require('mongoose')
 const { test, describe,before,beforeEach,after } = require('node:test')
 const app = require('../app') // Path to your Express app
 const Blog = require('../models/blogs') // Path to your Blog model
-
+const  User = require('../models/user')
+const jwt = require('jsonwebtoken')
 const api = supertest(app)
-
+let token = ''
 before(async () => {
   await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 })
 
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
+
+  const user = new User({
+    username: 'testuser',
+    name: 'Test User',
+    passwordHash: 'passwordhash'
+  })
+  await user.save()
+
+  token = jwt.sign({ id: user._id }, process.env.SECRET, { algorithm: 'HS256' })
 })
 
 describe('POST /api/blogs', () => {
 
-  test('should respond with 400 Bad Request if title is missing', async () => {
+  test.only('should respond with 400 Bad Request if title is missing', async () => {
     const newBlog = {
       author: 'Author E',
       url: 'http://example.com/blog-without-title',
@@ -27,8 +38,9 @@ describe('POST /api/blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
-      .expect(400) // Expecting 400 Bad Request
+      .expect(400)
   })
 
   test('should respond with 400 Bad Request if url is missing', async () => {
@@ -41,7 +53,7 @@ describe('POST /api/blogs', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
-      .expect(400) // Expecting 400 Bad Request
+      .expect(400)
   })
 
 })

@@ -1,25 +1,31 @@
 const supertest = require('supertest')
 const config = require('../utils/config')
-const { test, describe,before,beforeEach,after } = require('node:test')
+const { test, describe, before, beforeEach, after } = require('node:test')
 const assert = require('assert')
 const mongoose = require('mongoose')
-const app = require('../app') // Path to your Express app
-const Blog = require('../models/blogs') // Path to your Blog model
-
+const app = require('../app')
+const Blog = require('../models/blogs')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 const api = supertest(app)
+
 before(async () => {
   await mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 })
 
+let token = ''
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
 
-  const initialBlogs = [
-    { title: 'First Blog', author: 'Author A', url: 'http://example.com', likes: 5 },
-    { title: 'Second Blog', author: 'Author B', url: 'http://example.com', likes: 3 },
-  ]
+  const user = new User({
+    username: 'testuser',
+    name: 'Test User',
+    passwordHash: 'passwordhash' // Ideally, hash this password using bcrypt
+  })
+  await user.save()
 
-  await Blog.insertMany(initialBlogs)
+  token = jwt.sign({ id: user._id }, process.env.SECRET, { algorithm: 'HS256' })
 })
 
 describe('POST /api/blogs', () => {
@@ -34,16 +40,15 @@ describe('POST /api/blogs', () => {
     const blogsAtStart = await Blog.find({})
 
     // Make the POST request
-    await api
+    const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
     // Get the updated list of blogs
     const blogsAtEnd = await Blog.find({})
-    console.log(blogsAtEnd)
-    // Verify that the number of blogs increased by one
     assert.strictEqual(blogsAtEnd.length, blogsAtStart.length + 1)
 
     // Verify that the new blog post was saved correctly
@@ -55,6 +60,27 @@ describe('POST /api/blogs', () => {
     assert.strictEqual(savedBlog.author, newBlog.author)
     assert.strictEqual(savedBlog.url, newBlog.url)
     assert.strictEqual(savedBlog.likes, newBlog.likes)
+  })
+
+  test('should fail to add a new blog without a token', async () => {
+    const newBlog = {
+      title: 'Test blog without token',
+      author: 'No Token Author',
+      url: 'http://example.com/no-token',
+      likes: 5,
+    }
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+    // Ensure the response contains the correct error message
+    assert(response.body.error.includes('token missing'))
+
+    const blogsAtEnd = await Blog.find({})
+    assert.strictEqual(blogsAtEnd.length, 0)
   })
 })
 
