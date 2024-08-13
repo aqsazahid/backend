@@ -1,25 +1,22 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const phoneNumberValidator = (phoneNumber) => {
   if (phoneNumber.length < 8) {
-    return false;
+    return false
   }
-  
   // Split the phone number into two parts
-  const parts = phoneNumber.split('-');
-  
+  const parts = phoneNumber.split('-')
   // Validate the format: two parts separated by '-'
   if (parts.length !== 2) {
-    return false;
+    return false
   }
-
   // Validate each part: should be numbers and of correct length
-  const [firstPart, secondPart] = parts;
+  const [firstPart, secondPart] = parts
   return (
     /^\d{2,3}$/.test(firstPart) && // First part: 2 or 3 digits
     /^\d+$/.test(secondPart) // Second part: only digits
-  );
-};
+  )
+}
 const phonebookSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -34,14 +31,14 @@ const phonebookSchema = new mongoose.Schema({
     },
     required: [true, 'Number is required']
   }
-});
-
-phonebookSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-      returnedObject.id = returnedObject._id.toString()
-      delete returnedObject._id
-      delete returnedObject.__v
-    }
 })
 
-module.exports = mongoose.model('Phonebook', phonebookSchema);
+phonebookSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
+})
+
+module.exports = mongoose.model('Phonebook', phonebookSchema)
