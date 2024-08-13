@@ -42,7 +42,7 @@ blogsRouter.post('/api/blogs', async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: 'unable to save the blog post' })
   }
-});
+})
 
 blogsRouter.get('/', async (req, res) => {
   try {
@@ -50,6 +50,19 @@ blogsRouter.get('/', async (req, res) => {
     res.json(blogs)
   } catch (error) {
     res.status(500).json({ error: 'something went wrong' })
+  }
+})
+
+blogsRouter.delete('/api/blogs/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findByIdAndRemove(req.params.id)
+    if (blog) {
+      res.status(204).end()
+    } else {
+      res.status(404).json({ error: 'Blog post not found' })
+    }
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid blog post id' })
   }
 })
 
