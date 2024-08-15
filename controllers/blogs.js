@@ -4,18 +4,50 @@ const jwt = require('jsonwebtoken')
 const Blog = require('../models/blogs')
 const  User = require('../models/user')
 
+// blogsRouter.post('/', async (req, res) => {
+//   const { title, author, url, likes = 0 } = req.body
+
+//   const decodedToken = jwt.verify(req.token, process.env.SECRET)
+
+//   if (!decodedToken.id) {
+//     return res.status(401).json({ error: 'token invalid' })
+//   }
+//   const user = await User.findById(decodedToken.id)
+//   if (!title || !url) {
+//     return res.status(400).json({ error: 'title and url are required' })
+//   }
+//   try {decodedToken
+//     const blog = new Blog({
+//       title,
+//       author,
+//       url,
+//       likes: likes || 0,
+//       user: user._id
+//     })
+//     const savedBlog = await blog.findById(savedBlog._id).populate('user', { username: 1, name: 1 });
+//     user.blogs = user.blogs.concat(savedBlog._id)
+//     await user.save()
+//     res.status(201).json(savedBlog)
+//   } catch (error) {
+//     res.status(400).json({ error: 'unable to save the blog post' })
+//   }
+// })
+
 blogsRouter.post('/', async (req, res) => {
   const { title, author, url, likes = 0 } = req.body
 
-  const decodedToken = jwt.verify(req.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: 'token invalid' })
-  }
-  const user = await User.findOne()
-  if (!title || !url) {
-    return res.status(400).json({ error: 'title and url are required' })
-  }
   try {
+    const decodedToken = jwt.verify(req.token, process.env.SECRET)
+
+    if (!decodedToken.id) {
+      return res.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
+    if (!title || !url) {
+      return res.status(400).json({ error: 'title and url are required' })
+    }
+
     const blog = new Blog({
       title,
       author,
@@ -23,14 +55,18 @@ blogsRouter.post('/', async (req, res) => {
       likes: likes || 0,
       user: user._id
     })
+
     const savedBlog = await blog.save()
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
-    res.status(201).json(savedBlog)
+
+    const populatedBlog = await Blog.findById(savedBlog._id).populate('user', { username: 1, name: 1 })
+    res.status(201).json(populatedBlog)
   } catch (error) {
     res.status(400).json({ error: 'unable to save the blog post' })
   }
 })
+
 
 
 blogsRouter.put('/:id', async (req, res) => {
