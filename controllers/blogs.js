@@ -21,7 +21,7 @@ blogsRouter.post('/', async (req, res) => {
       author,
       url,
       likes: likes || 0,
-      user: user._id, // Assign the user's ID as the creator
+      user: user._id
     })
     const savedBlog = await blog.save()
     user.blogs = user.blogs.concat(savedBlog._id)
@@ -32,10 +32,29 @@ blogsRouter.post('/', async (req, res) => {
   }
 })
 
+
+blogsRouter.put('/:id', async (req, res) => {
+  const { id } = req.params
+  const { title, author, url, likes } = req.body
+
+  const blog = {
+    title,
+    author,
+    url,
+    likes
+  }
+
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(id, blog, { new: true })
+    res.json(updatedBlog)
+  } catch (error) {
+    res.status(500).json({ error: 'something went wrong' })
+  }
+})
+
 blogsRouter.get('/', async (req, res) => {
   try {
-    const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
-    // const blogs = await Blog.find({})
+    const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
     res.json(blogs)
   } catch (error) {
     res.status(500).json({ error: 'something went wrong' })
