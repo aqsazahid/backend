@@ -85,4 +85,29 @@ blogsRouter.delete('/:id', async (req, res) => {
   res.status(204).end()
 })
 
+blogsRouter.post('/:id/comments', async (req, res) => {
+   try {
+        const decodedToken = jwt.verify(req.token, process.env.SECRET);
+        if (!decodedToken.id) {
+            return res.status(401).json({ error: 'token invalid' });
+        }
+        const blog = await Blog.findById(req.params.id);
+        console.log(blog)
+        const comment = req.body.comment;
+        console.log(comment)
+
+        if (blog) {
+            blog.comments = blog.comments.concat(comment);
+            console.log("blog comment" + blog.comments.concat(comment))
+            const updatedBlog = await blog.save();
+            console.log("updated blog" + updatedBlog )
+            res.status(201).json(updatedBlog);
+        } else {
+            res.status(404).end();
+        }
+    } catch (exception) {
+        return res.status(401).json({ error: 'unauthorized' });
+    }
+});
+
 module.exports = blogsRouter

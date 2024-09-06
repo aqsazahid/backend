@@ -12,3 +12,4 @@ router.post('/reset', async (request, response) => {
 })
 
 module.exports = router
+
